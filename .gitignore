@@ -1,0 +1,35 @@
+# Runtime files
+logs/*.log
+logs/*.log.*
+/tmp/
+
+# Sensitive config — never commit
+config/autoscript.conf
+config/rclone.conf
+config/ssh_users.db
+config/xray_users.db
+
+# Certificates — never commit
+*.crt
+*.key
+*.pem
+*.csr
+*.gpg
+
+# acme.sh
+.acme.sh/
+
+# Backup archives
+*.tar.gz
+*.tar.gz.gpg
+*.zip
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*~
+
+# OS
+.DS_Store
+Thumbs.db
