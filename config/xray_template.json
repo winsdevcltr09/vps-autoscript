@@ -1,0 +1,152 @@
+{
+  "log": {
+    "loglevel": "warning",
+    "access": "/var/log/xray/access.log",
+    "error": "/var/log/xray/error.log"
+  },
+  "api": {
+    "tag": "api",
+    "services": ["StatsService", "HandlerService"]
+  },
+  "stats": {},
+  "policy": {
+    "levels": {
+      "0": {
+        "statsUserUplink": true,
+        "statsUserDownlink": true
+      }
+    },
+    "system": {
+      "statsInboundUplink": true,
+      "statsInboundDownlink": true
+    }
+  },
+  "inbounds": [
+    {
+      "tag": "api-in",
+      "listen": "127.0.0.1",
+      "port": "{{PORT_XRAY_API}}",
+      "protocol": "dokodemo-door",
+      "settings": { "address": "127.0.0.1" },
+      "streamSettings": {}
+    },
+    {
+      "tag": "vmess-ws",
+      "listen": "127.0.0.1",
+      "port": "{{PORT_XRAY_VMESS_WS}}",
+      "protocol": "vmess",
+      "settings": {
+        "clients": []
+      },
+      "streamSettings": {
+        "network": "ws",
+        "wsSettings": {
+          "path": "{{XRAY_WS_PATH_VMESS}}",
+          "headers": { "Host": "{{DOMAIN}}" }
+        }
+      },
+      "sniffing": { "enabled": true, "destOverride": ["http","tls"] }
+    },
+    {
+      "tag": "vmess-grpc",
+      "listen": "127.0.0.1",
+      "port": "{{PORT_XRAY_VMESS_GRPC}}",
+      "protocol": "vmess",
+      "settings": {
+        "clients": []
+      },
+      "streamSettings": {
+        "network": "grpc",
+        "grpcSettings": { "serviceName": "{{XRAY_GRPC_SERVICE_VMESS}}" }
+      }
+    },
+    {
+      "tag": "vless-ws",
+      "listen": "127.0.0.1",
+      "port": "{{PORT_XRAY_VLESS_WS}}",
+      "protocol": "vless",
+      "settings": {
+        "clients": [],
+        "decryption": "none"
+      },
+      "streamSettings": {
+        "network": "ws",
+        "wsSettings": {
+          "path": "{{XRAY_WS_PATH_VLESS}}",
+          "headers": { "Host": "{{DOMAIN}}" }
+        }
+      },
+      "sniffing": { "enabled": true, "destOverride": ["http","tls"] }
+    },
+    {
+      "tag": "vless-grpc",
+      "listen": "127.0.0.1",
+      "port": "{{PORT_XRAY_VLESS_GRPC}}",
+      "protocol": "vless",
+      "settings": {
+        "clients": [],
+        "decryption": "none"
+      },
+      "streamSettings": {
+        "network": "grpc",
+        "grpcSettings": { "serviceName": "{{XRAY_GRPC_SERVICE_VLESS}}" }
+      }
+    },
+    {
+      "tag": "trojan-ws",
+      "listen": "127.0.0.1",
+      "port": "{{PORT_XRAY_TROJAN_WS}}",
+      "protocol": "trojan",
+      "settings": {
+        "clients": []
+      },
+      "streamSettings": {
+        "network": "ws",
+        "wsSettings": {
+          "path": "{{XRAY_WS_PATH_TROJAN}}",
+          "headers": { "Host": "{{DOMAIN}}" }
+        }
+      },
+      "sniffing": { "enabled": true, "destOverride": ["http","tls"] }
+    },
+    {
+      "tag": "trojan-grpc",
+      "listen": "127.0.0.1",
+      "port": "{{PORT_XRAY_TROJAN_GRPC}}",
+      "protocol": "trojan",
+      "settings": {
+        "clients": []
+      },
+      "streamSettings": {
+        "network": "grpc",
+        "grpcSettings": { "serviceName": "{{XRAY_GRPC_SERVICE_TROJAN}}" }
+      }
+    }
+  ],
+  "outbounds": [
+    {
+      "tag": "direct",
+      "protocol": "freedom",
+      "settings": {}
+    },
+    {
+      "tag": "blocked",
+      "protocol": "blackhole",
+      "settings": {}
+    }
+  ],
+  "routing": {
+    "rules": [
+      {
+        "type": "field",
+        "inboundTag": ["api-in"],
+        "outboundTag": "api"
+      },
+      {
+        "type": "field",
+        "ip": ["geoip:private"],
+        "outboundTag": "blocked"
+      }
+    ]
+  }
+}
